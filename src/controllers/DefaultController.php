@@ -82,10 +82,11 @@ class DefaultController extends Controller
         $post = Yii::$app->request->post();
         if ($model->load($post) && $model->validate()) {
             $returnUrl = $this->performLogin($model->getUser(), $model->rememberMe);
+            Yii::$app->gtmDataLayerPush->add(['event' => 'login']);
             return $this->redirect($returnUrl);
         }
         
-        $this->layout = "@vendor/faro/core/src/themes/dmp2020/layouts/login";
+        $this->layout = "@vendor/faro/core/src/themes/faro20221/layouts/login";
 
         return $this->render('login', compact("model"));
     }
