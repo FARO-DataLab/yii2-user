@@ -19,7 +19,6 @@
             "faro\\core\\user\\": "src"
         }
     },
-    "extra": [],
     "repositories": [
         {
             "type": "composer",
