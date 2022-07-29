@@ -15,11 +15,11 @@
         "yiisoft/yii2-authclient": "*"
     },
     "autoload": {
-        "psr-4": { "faro\\core\\user\\": "src" }
+        "psr-4": {
+            "faro\\core\\user\\": "src"
+        }
     },
-    "extra": {
-        "branch-alias": {}
-    },
+    "extra": [],
     "repositories": [
         {
             "type": "composer",
@@ -27,19 +27,19 @@
         },
         {
             "type": "vcs",
-            "url":  "git@github.com:FARO-DataLab/faro-core.git"
+            "url": "git@github.com:FARO-DataLab/faro-core.git"
         },
         {
             "type": "vcs",
-            "url":  "git@github.com:FARO-DataLab/faro-media.git"
+            "url": "git@github.com:FARO-DataLab/faro-media.git"
         },
         {
             "type": "vcs",
-            "url":  "git@github.com:FARO-DataLab/faro-googleanalytics.git"
+            "url": "git@github.com:FARO-DataLab/faro-googleanalytics.git"
         },
         {
             "type": "vcs",
-            "url":  "git@github.com:FARO-DataLab/yii2-user.git"
+            "url": "git@github.com:FARO-DataLab/yii2-user.git"
         }
     ]
 }
