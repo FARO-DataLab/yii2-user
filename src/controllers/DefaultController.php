@@ -86,7 +86,7 @@ class DefaultController extends Controller
             return $this->redirect($returnUrl);
         }
         
-        $this->layout = "@vendor/faro/core/src/themes/faro20221/layouts/login";
+        $this->layout = "@faro/core/themes/faro20221/layouts/login";
 
         return $this->render('login', compact("model"));
     }
