@@ -25,20 +25,8 @@
             "url": "https://asset-packagist.org"
         },
         {
-            "type": "vcs",
-            "url": "git@github.com:FARO-DataLab/faro-core.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@github.com:FARO-DataLab/faro-media.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@github.com:FARO-DataLab/faro-googleanalytics.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@github.com:FARO-DataLab/yii2-user.git"
+            "type": "composer",
+            "url": "https://composer.faro.works/"
         }
     ]
 }
