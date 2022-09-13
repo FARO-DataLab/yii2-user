@@ -63,7 +63,7 @@ if (ControlUsuarios::esAdmin()) {
                 "format" => "raw",
                 "value" => function ($model) {
                     return \yii\bootstrap4\Html::a($model->profile->full_name,
-                        ["view", "id" => $model->id]);
+                        ["view", "id" => $model->username]);
                 }
             ],
             'email:email',

@@ -13,7 +13,7 @@ use yii\widgets\DetailView;
 
 $this->title = $user->profile->full_name;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Administración'), 'url' => ['/faro/admin']];
-$this->params['breadcrumbs'][] = ['label' => Yii::t('user', 'Users'), 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::t('user', 'Users'), 'url' => ['/user/admin/']];
 $this->params['breadcrumbs'][] = $this->title;
 
 if (ControlUsuarios::esAdmin()) {

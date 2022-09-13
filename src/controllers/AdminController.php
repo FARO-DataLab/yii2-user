@@ -183,7 +183,9 @@ class AdminController extends Controller
     {
         /** @var \faro\core\user\models\User $user */
         $user = $this->module->model("User");
-        $user = $user::findOne($id);
+        
+        $conditions = is_numeric($id) ? ['id' => $id] : ['username' => $id];
+        $user = $user::findOne($conditions);
         if ($user) {
             return $user;
         }
