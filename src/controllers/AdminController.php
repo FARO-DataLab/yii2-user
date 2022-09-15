@@ -144,7 +144,7 @@ class AdminController extends Controller
         if ($userLoaded && $user->validate() && $profile->validate()) {
             $user->save(false);
             $profile->setUser($user->id)->save(false);
-            return $this->redirect(['view', 'id' => $user->id]);
+            return $this->redirect(['view', 'id' => $user->username]);
         }
 
         // render

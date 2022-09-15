@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 if (ControlUsuarios::esAdmin()) {
     AccionesLayoutWidget::agregarBoton(
-        \yii\bootstrap4\Html::a("<i class='fas fa-edit'></i> Editar usuario", ['update', "id" => $user->id], ["class" => "dropdown-item"])
+        \yii\bootstrap4\Html::a("<i class='fas fa-edit'></i> Editar usuario", ['update', "id" => $user->username], ["class" => "dropdown-item"])
     );
 }
 ?>

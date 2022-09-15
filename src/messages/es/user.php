@@ -98,6 +98,7 @@ return [
     'Profile' => 'Perfil',
     'Resend' => 'Reenviar',
     'Password has been reset' => 'La contraseña ha sido reiniciada',
+    'Time zone' => 'Uso horario',
 //    'Login link sent - Please check your email' => '',
 //    'Registration link sent - Please check your email' => '',
 ];
