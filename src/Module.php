@@ -17,7 +17,7 @@ class Module extends FaroBaseModule
     /**
      * @var string Module version
      */
-    protected $version = "2022.1-dev";
+    protected $version = "2022.1.3";
 
     /**
      * @var string Alias for module
