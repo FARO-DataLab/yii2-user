@@ -2,9 +2,13 @@
 
 namespace faro\core\user\controllers;
 
+use faro\core\user\models\Role;
 use Yii;
 use faro\core\user\models\User;
 use yii\filters\AccessControl;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -22,7 +26,7 @@ class AdminController extends Controller
      * @inheritdoc
      */
     public $module;
-    
+
     /**
      * @inheritdoc
      */
@@ -43,7 +47,7 @@ class AdminController extends Controller
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'create', 'update', 'delete'],
+                        'actions' => ['index', 'view', 'create', 'update', 'delete', 'login-email'],
                         'allow' => true,
                         'roles' => ['admin']
                     ]
@@ -62,13 +66,34 @@ class AdminController extends Controller
      * List all User models
      * @return mixed
      */
-    public function actionIndex()
+    public function actionIndex($baneados = false)
     {
         /** @var \faro\core\user\models\search\UserSearch $searchModel */
         $searchModel = $this->module->model("UserSearch");
+        $searchModel->usuariosBaneados = $baneados;
         $dataProvider = $searchModel->search(Yii::$app->request->getQueryParams());
 
-        return $this->render('index', compact('searchModel', 'dataProvider'));
+        return $this->render('index', compact('searchModel', 'dataProvider', 'baneados'));
+    }
+
+    /**
+     * Login/register via email
+     */
+    public function actionLoginEmail()
+    {
+        /** @var \faro\core\user\models\forms\LoginEmailForm $loginEmailForm */
+        $loginEmailForm = $this->module->model("LoginEmailForm");
+
+        // load post data and validate
+        $post = Yii::$app->request->post();
+        if ($loginEmailForm->load($post) && $loginEmailForm->sendEmail()) {
+            $user = $loginEmailForm->getUser();
+            $message = $user ? "Login link sent" : "Registration link sent";
+            $message .= " - Please check your email";
+            Yii::$app->session->setFlash("Login-success", Yii::t("user", $message));
+        }
+
+        return $this->render("loginEmail", compact("loginEmailForm"));
     }
 
     /**
@@ -140,10 +165,17 @@ class AdminController extends Controller
             return ActiveForm::validate($user, $profile);
         }
 
+        //$categorias = $post['User']['categoriasHelper'];
+        //$categorias = Json::decode($categorias);
+        //if (!empty($post)) {
+        //    VarDumper::dump($post, 3, true); die();
+        //}
+
         // load post data and validate
         if ($userLoaded && $user->validate() && $profile->validate()) {
             $user->save(false);
             $profile->setUser($user->id)->save(false);
+            Yii::$app->session->setFlash('success', 'Se actualizó el usuario correctamente');
             return $this->redirect(['view', 'id' => $user->username]);
         }
 
@@ -183,7 +215,7 @@ class AdminController extends Controller
     {
         /** @var \faro\core\user\models\User $user */
         $user = $this->module->model("User");
-        
+
         $conditions = is_numeric($id) ? ['id' => $id] : ['username' => $id];
         $user = $user::findOne($conditions);
         if ($user) {

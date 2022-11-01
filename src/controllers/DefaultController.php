@@ -85,9 +85,8 @@ class DefaultController extends Controller
             Yii::$app->gtmDataLayerPush->add(['event' => 'login']);
             return $this->redirect($returnUrl);
         }
-        
-        $this->layout = "@faro/core/themes/faro20221/layouts/login";
 
+        $this->layout = '@faro/core/themes/faro20221/layouts/login';
         return $this->render('login', compact("model"));
     }
 
@@ -231,7 +230,8 @@ class DefaultController extends Controller
 
                 // set flash
                 // don't use $this->refresh() because user may automatically be logged in and get 403 forbidden
-                $successText = Yii::t("user", "Successfully registered [ {displayName} ]", ["displayName" => $user->getDisplayName()]);
+                $successText = Yii::t("user", "Successfully registered [ {displayName} ]",
+                    ["displayName" => $user->getDisplayName()]);
                 $guestText = "";
                 if (Yii::$app->user->isGuest) {
                     $guestText = Yii::t("user", " - Please check your email to confirm your account");
@@ -452,11 +452,12 @@ class DefaultController extends Controller
 
             // set flash (which will show on the current page)
             if ($model->sendForgotEmail()) {
-                Yii::$app->session->setFlash("success", Yii::t("user", "Instructions to reset your password have been sent"));
+                Yii::$app->session->setFlash("success",
+                    Yii::t("user", "Instructions to reset your password have been sent"));
             } else {
                 Yii::$app->session->setFlash("error", Yii::t("user", "No se pudo enviar el email"));
             }
-            
+
             return $this->refresh();
         }
 

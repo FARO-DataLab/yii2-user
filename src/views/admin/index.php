@@ -2,6 +2,8 @@
 
 use faro\core\components\ControlUsuarios;
 use faro\core\components\FaroGridView;
+use faro\core\components\HtmlComponentsHelper;
+use faro\core\user\models\Role;
 use faro\core\widgets\AccionesLayoutWidget;
 use faro\core\widgets\Panel;
 use yii\helpers\Html;
@@ -26,17 +28,30 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $this->params["navbar_menu_selected"] = "administracion";
 
-if (ControlUsuarios::esAdmin()) {
+AccionesLayoutWidget::agregarBoton(
+    \yii\bootstrap4\Html::a("<i class='fas fa-plus-circle'></i> Nuevo usuario", ['create'],
+        ["class" => "dropdown-item"])
+);
+
+if ($baneados) {
     AccionesLayoutWidget::agregarBoton(
-        \yii\bootstrap4\Html::a("<i class='fas fa-plus-circle'></i> Nuevo usuario", ['create'],
+        \yii\bootstrap4\Html::a("<i class='fas fa-check-circle'></i> Ver activos", ['index'],
+            ["class" => "dropdown-item"])
+    );
+} else {
+    AccionesLayoutWidget::agregarBoton(
+        \yii\bootstrap4\Html::a("<i class='fas fa-times-circle'></i> Ver eliminados", ['index', 'baneados' => true],
             ["class" => "dropdown-item"])
     );
 }
+
+
+$titulo = empty($baneados) ? 'Listado de usuarios' : 'Usuarios eliminados'; 
 ?>
 
 <div class="user-index">
 
-    <?php Panel::begin(['header' => 'Listado de usuarios']) ?>
+    <?php Panel::begin(['header' => $titulo]) ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -77,7 +92,29 @@ if (ControlUsuarios::esAdmin()) {
                 },
             ],
 
-            'profile.timezone',
+            'categorias' => [
+                'attribute' => null,
+                'header' => 'Accesos',
+                'format' => 'raw',
+                'value' => function ($data) {
+                    if ($data->role_id == Role::ROLE_ADMIN) {
+                        return 'Total';
+                    }
+
+                    $categorias = $data->categorias;
+                    if (count($categorias) === 0) {
+                        return 'Todas las categorías';
+                    }
+
+                    $html = '';
+                    foreach ($categorias as $categoria) {
+                        $html .= HtmlComponentsHelper::imprimirBadgeCategoria($categoria->nombre, $categoria->slug,
+                            $categoria->color, 'mr-2');
+                    }
+
+                    return $html;
+                }
+            ],
             'created_at:relativeTime',
             // 'username',
             // 'password',

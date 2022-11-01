@@ -12,6 +12,8 @@ use faro\core\user\models\User;
  */
 class UserSearch extends User
 {
+    public $usuariosBaneados = false;
+    
     /**
      * @inheritdoc
      */
@@ -74,7 +76,7 @@ class UserSearch extends User
 
         // create data provider
         $dataProvider = new ActiveDataProvider([
-            'query' => $query,
+            'query' => $query
         ]);
 
         // enable sorting for the related columns
@@ -85,6 +87,13 @@ class UserSearch extends User
                 'desc' => [$addSortAttribute => SORT_DESC],
             ];
         }
+
+        if ($this->usuariosBaneados) {
+            $query->andWhere('banned_at IS NOT NULL');
+        } else {
+            $query->andWhere('banned_at IS NULL');
+        }
+        
 
         if (!($this->load($params) && $this->validate())) {
             return $dataProvider;

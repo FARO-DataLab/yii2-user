@@ -16,7 +16,8 @@
     },
     "autoload": {
         "psr-4": {
-            "faro\\core\\user\\": "src"
+            "faro\\core\\user\\": "src",
+            "faro\\core\\user\\tests\\": "tests"
         }
     },
     "repositories": [

@@ -2,8 +2,11 @@
 
 namespace faro\core\user\models;
 
+use faro\core\models\Categoria;
+use faro\media\models\RelacionCampanaPropiedad;
 use Yii;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 use yii\web\IdentityInterface;
 use yii\swiftmailer\Mailer;
 use yii\swiftmailer\Message;
@@ -77,6 +80,11 @@ class User extends ActiveRecord implements IdentityInterface
     public $module;
 
     /**
+     * @var array Helper para guardar las categorias asociadas
+     */
+    public $categoriasHelper;
+
+    /**
      * @return string
      */
     public static function tableName()
@@ -105,14 +113,43 @@ class User extends ActiveRecord implements IdentityInterface
             [['email', 'username'], 'unique'],
             [['email', 'username'], 'filter', 'filter' => 'trim'],
             [['email'], 'email'],
-            [['username'], 'match', 'pattern' => '/^\w+$/u', 'except' => 'social', 'message' => Yii::t('user', '{attribute} can contain only letters, numbers, and "_"')],
+            [
+                ['username'],
+                'match',
+                'pattern' => '/^\w+$/u',
+                'except' => 'social',
+                'message' => Yii::t('user', '{attribute} can contain only letters, numbers, and "_"')
+            ],
 
             // password rules
             [['newPassword'], 'string', 'min' => 3],
             [['newPassword'], 'filter', 'filter' => 'trim'],
             [['newPassword'], 'required', 'on' => ['register', 'reset']],
+            [
+                ['newPassword'],
+                'required',
+                'on' => ['admin'],
+                'when' => function ($model) {
+                    return $model->getIsNewRecord();
+                },
+                'whenClient' => "function (attribute, value) {
+                    return window.location.href.indexOf('update') === -1;
+                }",
+            ],
+            [['newPasswordConfirm'], 'required', 'on' => ['register', 'reset']],
+            [
+                ['newPasswordConfirm'],
+                'compare',
+                'compareAttribute' => 'newPassword',
+                'on' => ['register', 'reset', 'admin']
+            ],
             [['newPasswordConfirm'], 'required', 'on' => ['reset']],
-            [['newPasswordConfirm'], 'compare', 'compareAttribute' => 'newPassword', 'message' => Yii::t('user', 'Passwords do not match')],
+            [
+                ['newPasswordConfirm'],
+                'compare',
+                'compareAttribute' => 'newPassword',
+                'message' => Yii::t('user', 'Passwords do not match')
+            ],
 
             // account page
             [['currentPassword'], 'validateCurrentPassword', 'on' => ['account']],
@@ -122,6 +159,8 @@ class User extends ActiveRecord implements IdentityInterface
             [['role_id', 'status'], 'integer', 'on' => ['admin']],
             [['banned_at'], 'integer', 'on' => ['admin']],
             [['banned_reason'], 'string', 'max' => 255, 'on' => 'admin'],
+
+            [['categorias'], 'safe'],
         ];
 
         // add required for currentPassword on account page
@@ -202,6 +241,30 @@ class User extends ActiveRecord implements IdentityInterface
     {
         $profile = $this->module->model("Profile");
         return $this->hasOne($profile::className(), ['user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPermisosCategoria()
+    {
+        return self::hasMany(PermisoUsuarioCategoria::class, ['usuario_id' => 'id']);
+    }
+
+    /**
+     * @return null
+     */
+    public function setCategorias($categorias)
+    {
+        $this->categoriasHelper = $categorias;
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCategorias()
+    {
+        return self::hasMany(Categoria::class, ['id' => 'categoria_id'])->via('permisosCategoria');
     }
 
     /**
@@ -311,6 +374,33 @@ class User extends ActiveRecord implements IdentityInterface
 
         return parent::beforeSave($insert);
     }
+
+    /**
+     * Hook post guardar modelo que se encarga de revisar y guardar los permisos con las categorias en caso de
+     * ser necesario.
+     *
+     * @param $insert
+     * @param $changedAttributes
+     * @return void
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if ((int)$this->role_id === Role::ROLE_ADMIN) {
+            // si es administrador no debería tener permisos ni categorias
+            $this->categoriasHelper = [];
+            $this->borrarCategoriasNoElegidas();
+
+            return;
+        }
+
+        // sino es administrador tengo que fijarmse si tenia permisos y los permisos nuevos
+        if ($this->categoriasHelper !== null) {
+            $this->procesarCategorias();
+        }
+    }
+
 
     /**
      * Set attributes for registration
@@ -506,4 +596,67 @@ class User extends ActiveRecord implements IdentityInterface
 
         return $dropdown;
     }
+
+    /**
+     * @return void
+     */
+    protected function procesarCategorias()
+    {
+        if (!empty($this->categoriasHelper)) {
+            $categoriasActuales = $this->categorias;
+            foreach ($this->categoriasHelper as $categoriaId) {
+                $crear = true;
+                foreach ($categoriasActuales as $categoriaActual) {
+                    if ($categoriaActual->id == $categoriaId) {
+                        $crear = false;
+                        break;
+                    }
+                }
+
+                if ($crear) {
+                    $this->crearPermisoCategoria($categoriaId);
+                }
+            }
+        }
+
+        $this->borrarCategoriasNoElegidas();
+    }
+
+
+    /**
+     * Se encarga de crear la relacion
+     * @param int $categoriaId id de la categoria
+     * @return bool
+     */
+    protected function crearPermisoCategoria($categoriaId)
+    {
+        $permiso = new PermisoUsuarioCategoria();
+        $permiso->usuario_id = $this->id;
+        $permiso->categoria_id = $categoriaId;
+        return $permiso->save();
+    }
+
+    /**
+     * @return bool|int
+     */
+    protected function borrarCategoriasNoElegidas()
+    {
+        $query = PermisoUsuarioCategoria::find()->where(['usuario_id' => $this->id]);
+        if (!empty($this->categoriasHelper)) {
+            $query = $query->andWhere(['not in', 'categoria_id', $this->categoriasHelper]);
+        }
+
+        $permisosABorrar = $query->all();
+
+        // sino hay resultados salteo el mapping
+        if (!count($permisosABorrar)) {
+            return true;
+        }
+
+        //convierto a array
+        $permisosABorrar = ArrayHelper::map($permisosABorrar, 'id', 'id');
+        //borro las web que no estan seleccionadas.
+        return PermisoUsuarioCategoria::deleteAll(['id' => $permisosABorrar]);
+    }
+
 }

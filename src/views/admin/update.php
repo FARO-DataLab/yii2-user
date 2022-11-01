@@ -28,10 +28,10 @@ $this->params['breadcrumbs'][] = Yii::t('user', 'Update');
     <?php Panel::end() ?>
 
 
-    <?php Panel::begin(["header" => "Eliminar campaña", "margenTop" => true]) ?>
+    <?php Panel::begin(["header" => "Eliminar usuario", "margenTop" => true]) ?>
 
     <p>Para eliminar este usuario ingresá desde acá. Si creés que en un futuro puede volver a ser
-    necesario te sugerimos que lo desactives.</p>
+        necesario <a href="#" onclick="document.getElementsByClassName('usuario-configuracion-ban')[0].classList.remove('d-none');">te sugerimos que lo desactives</a>.</p>
 
     <?= Alert::widget([
         "body" => "<i class='fas fa-exclamation-triangle mr-2'></i> Esta acción no puede deshacerse",

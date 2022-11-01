@@ -22,7 +22,7 @@ return [
     'Auth Key' => 'Clave de Autorización',
     'Access Token' => 'Token de Acceso',
     'Logged In Ip' => 'IP de Conexión',
-    'Logged In At' => 'Fecha de Conexión',
+    'Logged In At' => 'Último login',
     'Created Ip' => 'IP de Creación',
     'Banned At' => 'Tiempo de Expulsión',
     'Banned Reason' => 'Razón de Expulsión',

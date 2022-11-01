@@ -3,16 +3,20 @@
 namespace faro\core\user\components;
 
 use Yii;
+use yii\base\InvalidConfigException;
+use yii\helpers\ArrayHelper;
 
 /**
  * User component
+ *
+ * @property-read int[] $permisosCategorias
  */
 class User extends \yii\web\User
 {
     /**
      * @inheritdoc
      */
-    public $identityClass = 'faro\core\user\models\User';
+    public $identityClass = \faro\core\user\models\User::class;
 
     /**
      * @inheritdoc
@@ -22,7 +26,7 @@ class User extends \yii\web\User
     /**
      * @inheritdoc
      */
-    public $loginUrl = ["/user/login"];
+    public $loginUrl = ['/user/login'];
 
     /**
      * @inheritdoc
@@ -69,7 +73,7 @@ class User extends \yii\web\User
     {
         /** @var \faro\core\user\models\User $user */
         $user = $this->getIdentity();
-        return $user ? $user->getDisplayName() : "";
+        return $user ? $user->getDisplayName() : '';
     }
 
     /**
@@ -93,5 +97,32 @@ class User extends \yii\web\User
         /** @var \faro\core\user\models\User $user */
         $user = $this->getIdentity();
         return $user ? $user->can($permissionName) : false;
+    }
+
+    /**
+     * Se encarga de devolver null si el usuario tiene acceso a todas las categorias y sino un array con los ids
+     * de las categorias a las que tiene acceso.
+     *
+     * @return ?int[]
+     * @throws InvalidConfigException
+     */
+    public function getPermisosCategorias(): ?array
+    {
+        $user = $this->getIdentity();
+        if (!$user || !$this->getIsLoggedIn()) {
+            throw new InvalidConfigException('El usuario no está logueado');
+        }
+
+        if ($this->can('admin')) {
+            return null;
+        }
+
+        $categorias = $user->categorias;
+        // si no tiene categorias asociadas entonces tiene acceso a todo
+        if (!$categorias) {
+            return null;
+        }
+
+        return ArrayHelper::getColumn($categorias, 'id');
     }
 }
