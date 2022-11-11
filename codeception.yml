@@ -17,11 +17,12 @@ coverage:
     #remote_config: '../codeception.yml'
     whitelist:
         include:
-            - src/behaviors/*
+            - src/*
             - src/helpers/*
             - src/models/*
             - src/controllers/*
             - src/components/*
-            - src/widgets/*
             - src/views/*
+        exclude:
+            - src/migrations/*
           
