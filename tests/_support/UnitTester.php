@@ -1,5 +1,5 @@
 <?php
-namespace faro_core_user;
+namespace faro\core\user;
 
 /**
  * Inherited Methods
