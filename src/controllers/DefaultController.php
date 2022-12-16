@@ -35,7 +35,7 @@ class DefaultController extends Controller
                         'roles' => ['?', '@'],
                     ],
                     [
-                        'actions' => ['account', 'profile', 'resend-change', 'cancel'],
+                        'actions' => ['account', 'profile', 'edit-profile', 'resend-change', 'cancel'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -349,11 +349,17 @@ class DefaultController extends Controller
 
         return $this->render("account", compact("user", "userToken"));
     }
+    
+    public function actionProfile()
+    {
+        $profile = Yii::$app->user->identity->profile;
+        return $this->render("profile", compact("profile"));
+    }
 
     /**
      * Profile
      */
-    public function actionProfile()
+    public function actionEditProfile()
     {
         /** @var \faro\core\user\models\Profile $profile */
 
@@ -370,11 +376,11 @@ class DefaultController extends Controller
         // validate for normal request
         if ($loadedPost && $profile->validate()) {
             $profile->save(false);
-            Yii::$app->session->setFlash("Profile-success", Yii::t("user", "Profile updated"));
+            Yii::$app->session->setFlash("success", Yii::t("user", "Profile updated"));
             return $this->refresh();
         }
 
-        return $this->render("profile", compact("profile"));
+        return $this->render("edit-profile", compact("profile"));
     }
 
     /**

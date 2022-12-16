@@ -135,7 +135,7 @@ class Module extends FaroBaseModule
             Yii::$app->i18n->translations['user'] = [
                 'class' => 'yii\i18n\PhpMessageSource',
                 'basePath' => __DIR__ . '/messages',
-                'forceTranslation' => $this->forceTranslation,
+                'forceTranslation' => true,
             ];
         }
 

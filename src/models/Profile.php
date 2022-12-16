@@ -2,6 +2,7 @@
 
 namespace faro\core\user\models;
 
+use faro\core\enums\IdiomasDisponibles;
 use Yii;
 use yii\db\ActiveRecord;
 
@@ -14,6 +15,7 @@ use yii\db\ActiveRecord;
  * @property string $updated_at
  * @property string $full_name
  * @property string $timezone
+ * @property string $idioma
  *
  * @property User $user
  */
@@ -51,6 +53,19 @@ class Profile extends ActiveRecord
         return [
             [['full_name'], 'string', 'max' => 255],
             [['timezone'], 'string', 'max' => 255],
+            [
+                'idioma',
+                function ($attribute, $params, $validator) {
+                    // si no mando nada es valido
+                    if (empty($this->$attribute)) {
+                        return;
+                    }
+                    
+                    if (!IdiomasDisponibles::isValidValue($this->$attribute)) {
+                        $this->addError($attribute, 'Idioma no válido');
+                    }
+                }
+            ],
         ];
     }
 
@@ -66,6 +81,7 @@ class Profile extends ActiveRecord
             'updated_at' => Yii::t('user', 'Updated At'),
             'full_name' => Yii::t('user', 'Full Name'),
             'timezone' => Yii::t('user', 'Time zone'),
+            'idioma' => Yii::t('user', 'Idioma'),
         ];
     }
 
@@ -82,6 +98,18 @@ class Profile extends ActiveRecord
                 },
             ],
         ];
+    }
+
+
+    /**
+     * Devuelve las iniciales del usuario en funcion de su nombre y apellido
+     * @return string
+     */
+    public function getIniciales()
+    {
+        $nombres = explode(' ', $this->full_name);
+        $iniciales = array_map(fn($e) => substr($e, 0, 1), $nombres);
+        return strtoupper(implode('', $iniciales));
     }
 
     /**

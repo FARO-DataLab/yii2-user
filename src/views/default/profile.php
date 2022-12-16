@@ -1,5 +1,11 @@
 <?php
 
+use faro\core\components\HtmlComponentsHelper;
+use faro\core\enums\IdiomasDisponibles;
+use faro\core\user\enums\EstadoUsuario;
+use faro\core\user\models\Role;
+use faro\core\widgets\AccionesLayoutWidget;
+use faro\core\widgets\FaroDetailView;
 use faro\core\widgets\Panel;
 use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
@@ -14,40 +20,67 @@ use faro\core\user\helpers\Timezone;
 
 $this->title = Yii::t('user', 'Profile');
 $this->params['breadcrumbs'][] = $this->title;
+
+AccionesLayoutWidget::agregarBoton(
+    \yii\bootstrap4\Html::a("<i class='fas fa-edit'></i> " . t('user', 'Editar perfil'), ['edit-profile'],
+        ["class" => "dropdown-item"])
+);
+
+$user = $profile->user;
+
 ?>
-<div class="user-default-profile">
-    
-    <?php Panel::begin(['header' => 'Actualizar perfil']) ?>
 
-    <?php $form = ActiveForm::begin([
-        'id' => 'profile-form',
-        'options' => ['class' => 'form-horizontal'],
-        'fieldConfig' => [
-            'template' => "{label}\n<div class=\"col-lg-3\">{input}</div>\n<div class=\"col-lg-7\">{error}</div>",
-            'labelOptions' => ['class' => 'col-lg-2 control-label'],
-        ],
-        'enableAjaxValidation' => true,
-    ]); ?>
+<div class="user-view">
 
-    <?= $form->field($profile, 'full_name') ?>
+    <?php if (!empty($user->banned_at)): ?>
+        <div class="alert alert-danger">
+            <?= t('user', 'El usuario fue expulsado del sistema. Razón:') ?>
+            <blockquote class="mt-2 mb-1"><?= $user->banned_reason ?></blockquote>
+        </div>
+    <?php endif ?>
 
-    <?php
-    // by default, this contains the entire php timezone list of 400+ entries
-    // so you may want to set up a fancy jquery select plugin for this, eg, select2 or chosen
-    // alternatively, you could use your own filtered list
-    // a good example is twitter's timezone choices, which contains ~143  entries
-    // @link https://twitter.com/settings/account
-    ?>
-    <?= $form->field($profile, 'timezone')->dropDownList(ArrayHelper::map(Timezone::getAll(), 'identifier', 'name')); ?>
+    <div class="row">
+        <div class="col-lg-3">
 
-    <div class="form-group">
-        <div class="col-lg-offset-2 col-lg-10">
-            <?= Html::submitButton(Yii::t('user', 'Update'), ['class' => 'btn btn-primary']) ?>
+            <?php Panel::begin(['header' => false]) ?>
+
+            <div class="alert alert-info small text-center">
+                <h6 class="m-0"><?= t('core', 'Usuario administrador') ?></h6>
+            </div>
+            
+            <div class="w-100 mb-3">
+                <div class="faro-profile-picture"><?= $user->profile->getIniciales() ?></div>
+            </div>
+
+            <?= FaroDetailView::widget([
+                'model' => $user,
+                'attributes' => [
+                    'email:email',
+                    'username',
+                    'profile.full_name',
+                    'profile.idioma',
+                    'id',
+                    'logged_in_ip',
+                    'logged_in_at:relativeTime',
+                    'created_at',
+                ],
+            ]) ?>
+
+            <?php Panel::end() ?>
+
+        </div>
+        <div class="col-lg-9">
+
+            <?php Panel::begin(['header' => t('core', 'Actividad'), 'margenTop' => false]) ?>
+
+            <div class="alert alert-info mb-0">
+                <h5 class="my-0"><?= t('core', 'Próximamente') ?></h5>
+            </div>
+
+            <?php Panel::end() ?>
+
         </div>
     </div>
 
-    <?php ActiveForm::end(); ?>
-    
-    <?php Panel::end() ?>
 
 </div>
